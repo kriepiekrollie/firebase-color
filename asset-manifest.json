@@ -1,15 +1,15 @@
 {
   "files": {
-    "main.css": "/firebase-color/static/css/main.30b7fbb8.css",
-    "main.js": "/firebase-color/static/js/main.695cd3fc.js",
+    "main.css": "/firebase-color/static/css/main.f82fd379.css",
+    "main.js": "/firebase-color/static/js/main.cb74e697.js",
     "static/js/787.582bff2c.chunk.js": "/firebase-color/static/js/787.582bff2c.chunk.js",
     "index.html": "/firebase-color/index.html",
-    "main.30b7fbb8.css.map": "/firebase-color/static/css/main.30b7fbb8.css.map",
-    "main.695cd3fc.js.map": "/firebase-color/static/js/main.695cd3fc.js.map",
+    "main.f82fd379.css.map": "/firebase-color/static/css/main.f82fd379.css.map",
+    "main.cb74e697.js.map": "/firebase-color/static/js/main.cb74e697.js.map",
     "787.582bff2c.chunk.js.map": "/firebase-color/static/js/787.582bff2c.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.30b7fbb8.css",
-    "static/js/main.695cd3fc.js"
+    "static/css/main.f82fd379.css",
+    "static/js/main.cb74e697.js"
   ]
 }
