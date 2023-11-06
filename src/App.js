@@ -1,7 +1,7 @@
 import { useRef, useState, useEffect } from "react";
 import { initializeApp } from "firebase/app";
 import { getAuth, onAuthStateChanged, signInAnonymously } from "firebase/auth";
-import { getDatabase, ref, set, get, onValue, off, onDisconnect } from "firebase/database";
+import { getDatabase, ref, set, get, remove, onValue, off, onDisconnect } from "firebase/database";
 import "./App.css";
 
 function App() {
@@ -9,6 +9,7 @@ function App() {
   const gSliderRef = useRef(null);
   const bSliderRef = useRef(null);
 
+  const [userCount, setUserCount] = useState(0);
   const [userId, setUserId] = useState(null);
   const [db, setDB] = useState(null);
 
@@ -47,12 +48,26 @@ function App() {
     const db = getDatabase();
     setDB(db);
 
+    const usersRef = ref(db, "users");
+
     onAuthStateChanged(auth, (user) => {
       if (user) {
+
         setUserId(user.uid);
+        const userRef = ref(db, `users/${user.uid}`);
+        set(userRef, {
+          uid: user.uid,
+        });
+        onDisconnect(userRef).remove();
+
       } else {
+        remove(ref(db, `users/${userId}`));
         setUserId("");
       }
+    });
+
+    onValue(usersRef, (snapshot) => {
+      setUserCount(snapshot.size);
     });
 
     const colorRef = ref(db, "color");
@@ -95,53 +110,58 @@ function App() {
   }
 
   return (
-    <div style={{
-      backgroundColor: `rgb(${color.r.val}, ${color.g.val}, ${color.b.val})`,
-    }}>
+    <>
+      <div className="main" style={{
+        backgroundColor: `rgb(${color.r.val}, ${color.g.val}, ${color.b.val})`,
+      }}>
 
-      <input 
-        ref={rSliderRef} 
-        disabled={!(color.r.currentUser === "" || color.r.currentUser == userId)} 
+        <div className="picker">
+          <h1> Users online: { userCount } </h1>
+          <input 
+            ref={rSliderRef} 
+            disabled={!(color.r.currentUser === "" || color.r.currentUser == userId)} 
 
-        onPointerDown={handlePointerDown}
-        onPointerUp={handlePointerUp}
-        onChange={handleChange}
+            onPointerDown={handlePointerDown}
+            onPointerUp={handlePointerUp}
+            onChange={handleChange}
 
-        name="r"
-        type="range" 
-        min="0" 
-        max="255" 
-      /><br/>
+            name="r"
+            type="range" 
+            min="0" 
+            max="255" 
+          />
 
-      <input 
-        ref={gSliderRef} 
-        disabled={!(color.g.currentUser === "" || color.g.currentUser == userId)} 
+          <input 
+            ref={gSliderRef} 
+            disabled={!(color.g.currentUser === "" || color.g.currentUser == userId)} 
 
-        onPointerDown={handlePointerDown}
-        onPointerUp={handlePointerUp}
-        onChange={handleChange}
+            onPointerDown={handlePointerDown}
+            onPointerUp={handlePointerUp}
+            onChange={handleChange}
 
-        name="g"
-        type="range" 
-        min="0" 
-        max="255" 
-      /><br/>
+            name="g"
+            type="range" 
+            min="0" 
+            max="255" 
+          />
 
-      <input 
-        ref={bSliderRef} 
-        disabled={!(color.b.currentUser === "" || color.b.currentUser == userId)} 
+          <input 
+            ref={bSliderRef} 
+            disabled={!(color.b.currentUser === "" || color.b.currentUser == userId)} 
 
-        onPointerDown={handlePointerDown}
-        onPointerUp={handlePointerUp}
-        onChange={handleChange}
+            onPointerDown={handlePointerDown}
+            onPointerUp={handlePointerUp}
+            onChange={handleChange}
 
-        name="b"
-        type="range" 
-        min="0" 
-        max="255" 
-      /><br/>
+            name="b"
+            type="range" 
+            min="0" 
+            max="255" 
+          />
+        </div>
 
-    </div>
+      </div>
+    </>
   );
 }
 
