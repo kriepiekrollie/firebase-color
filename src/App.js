@@ -72,7 +72,6 @@ function App() {
   }, []);
 
   function handlePointerDown(event) {
-    console.log("Mouse Down!");
     const cRef = ref(db, `color/${event.target.name}`);
     set(cRef, {
       currentUser: userId,
@@ -80,7 +79,6 @@ function App() {
     });
   }
   function handlePointerUp(event) {
-    console.log("Mouse up!");
     const cRef = ref(db, `color/${event.target.name}`);
     set(cRef, {
       currentUser: "",
