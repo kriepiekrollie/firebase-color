@@ -1,7 +1,7 @@
 import { useRef, useState, useEffect } from "react";
 import { initializeApp } from "firebase/app";
 import { getAuth, onAuthStateChanged, signInAnonymously } from "firebase/auth";
-import { getDatabase, ref, set, onValue, off } from "firebase/database";
+import { getDatabase, ref, set, get, onValue, off } from "firebase/database";
 
 function App() {
   const [colorRef, setColorRef] = useState(null);
@@ -37,6 +37,23 @@ function App() {
     const cRef = ref(db, "color");
     setColorRef(cRef);
 
+    get(cRef)
+      .then((snapshot) => {
+        const rgb = snapshot.val();
+        if (rgb.r != red) {
+          rSliderRef.current.value = rgb.r;
+          setRed(rgb.r);
+        }
+        if (rgb.g != green) {
+          gSliderRef.current.value = rgb.g;
+          setGreen(rgb.g);
+        }
+        if (rgb.b != blue) {
+          bSliderRef.current.value = rgb.b;
+          setBlue(rgb.b);
+        }
+      });
+
     onAuthStateChanged(auth, (user) => {
       if (user) {
         console.log("Logged in.");
@@ -57,16 +74,27 @@ function App() {
     if (colorRef === null) {
       return;
     }
+    if (updated) {
+      set(colorRef, {
+        r: red,
+        g: green,
+        b: blue,
+      });
+      setUpdated(false);
+    }
 
-    const listener = onValue(colorRef, (snapshot) => {
+    onValue(colorRef, (snapshot) => {
       const rgb = snapshot.val();
       if (rgb.r != red) {
+        rSliderRef.current.value = rgb.r;
         setRed(rgb.r);
       }
       if (rgb.g != green) {
+        gSliderRef.current.value = rgb.g;
         setGreen(rgb.g);
       }
       if (rgb.b != blue) {
+        bSliderRef.current.value = rgb.b;
         setBlue(rgb.b);
       }
     });
@@ -80,7 +108,7 @@ function App() {
         });
         setUpdated(false);
       }
-    }, 200);
+    }, 20);
     return () => {
       off(colorRef);
       clearInterval(interval);
@@ -114,9 +142,9 @@ function App() {
     }}>
 
       <form onChange={handleColorChange}> 
-        <input ref={rSliderRef} type="range" min="0" max="255" name="r" />
-        <input ref={gSliderRef} type="range" min="0" max="255" name="g" />
-        <input ref={bSliderRef} type="range" min="0" max="255" name="b" />
+        <input ref={rSliderRef} type="range" min="0" max="255" name="r" /><br/>
+        <input ref={gSliderRef} type="range" min="0" max="255" name="g" /><br/>
+        <input ref={bSliderRef} type="range" min="0" max="255" name="b" /><br/>
       </form>
 
     </div>
