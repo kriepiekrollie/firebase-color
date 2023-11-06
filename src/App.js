@@ -1,65 +1,66 @@
 import { useRef, useState, useEffect } from "react";
 import { initializeApp } from "firebase/app";
 import { getAuth, onAuthStateChanged, signInAnonymously } from "firebase/auth";
-import { getDatabase, ref, set, get, onValue, off } from "firebase/database";
+import { getDatabase, ref, set, get, onValue, off, onDisconnect } from "firebase/database";
 
 function App() {
-  const [colorRef, setColorRef] = useState(null);
-
   const rSliderRef = useRef(null);
   const gSliderRef = useRef(null);
   const bSliderRef = useRef(null);
 
-  const [red, setRed] = useState(0);
-  const [green, setGreen] = useState(0);
-  const [blue, setBlue] = useState(0);
+  const [userId, setUserId] = useState(null);
+  const [db, setDB] = useState(null);
 
-  const [updated, setUpdated] = useState(false);
+  const [color, setColor] = useState({
+    r: {
+      currentUser: "",
+      val: 0,
+    },
+    g: {
+      currentUser: "",
+      val: 0,
+    },
+    b: {
+      currentUser: "",
+      val: 0,
+    },
+  });
 
   useEffect(() => {
-    rSliderRef.current.value = red;
-    gSliderRef.current.value = green;
-    bSliderRef.current.value = blue;
+    rSliderRef.current.value = color.r.val;
+    gSliderRef.current.value = color.g.val;
+    bSliderRef.current.value = color.b.val;
 
     const firebaseConfig = {
-      apiKey: "AIzaSyD17oz6__jT1xUgV9fzq73Ffqj9okY7Vjc",
-      authDomain: "blocky-platformer.firebaseapp.com",
-      databaseURL: "https://blocky-platformer-default-rtdb.europe-west1.firebasedatabase.app",
-      projectId: "blocky-platformer",
-      storageBucket: "blocky-platformer.appspot.com",
-      messagingSenderId: "131040467603",
-      appId: "1:131040467603:web:0a63889e5ada12fc4e4b66"
+      apiKey: "AIzaSyCtTiAZjftFrnNxrTtTI_uSrINKyvplX60",
+      authDomain: "color-bd3dd.firebaseapp.com",
+      databaseURL: "https://color-bd3dd-default-rtdb.europe-west1.firebasedatabase.app",
+      projectId: "color-bd3dd",
+      storageBucket: "color-bd3dd.appspot.com",
+      messagingSenderId: "48176252468",
+      appId: "1:48176252468:web:ffeb0ffa120ee57fe3ac61"
     };
+
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
-
     const db = getDatabase();
-    const cRef = ref(db, "color");
-    setColorRef(cRef);
-
-    get(cRef)
-      .then((snapshot) => {
-        const rgb = snapshot.val();
-        if (rgb.r != red) {
-          rSliderRef.current.value = rgb.r;
-          setRed(rgb.r);
-        }
-        if (rgb.g != green) {
-          gSliderRef.current.value = rgb.g;
-          setGreen(rgb.g);
-        }
-        if (rgb.b != blue) {
-          bSliderRef.current.value = rgb.b;
-          setBlue(rgb.b);
-        }
-      });
+    setDB(db);
 
     onAuthStateChanged(auth, (user) => {
       if (user) {
-        console.log("Logged in.");
+        setUserId(user.uid);
       } else {
-        console.log("Logged out.");
+        setUserId("");
       }
+    });
+
+    const colorRef = ref(db, "color");
+    onValue(colorRef, (snapshot) => {
+      const c = snapshot.val();
+      rSliderRef.current.value = c.r.val;
+      gSliderRef.current.value = c.g.val;
+      bSliderRef.current.value = c.b.val;
+      setColor(c);
     });
 
     signInAnonymously(auth)
@@ -70,82 +71,76 @@ function App() {
       });
   }, []);
 
-  useEffect(() => {
-    if (colorRef === null) {
-      return;
-    }
-    if (updated) {
-      set(colorRef, {
-        r: red,
-        g: green,
-        b: blue,
-      });
-      setUpdated(false);
-    }
-
-    onValue(colorRef, (snapshot) => {
-      const rgb = snapshot.val();
-      if (rgb.r != red) {
-        rSliderRef.current.value = rgb.r;
-        setRed(rgb.r);
-      }
-      if (rgb.g != green) {
-        gSliderRef.current.value = rgb.g;
-        setGreen(rgb.g);
-      }
-      if (rgb.b != blue) {
-        bSliderRef.current.value = rgb.b;
-        setBlue(rgb.b);
-      }
+  function handleMouseDown(event) {
+    const cRef = ref(db, `color/${event.target.name}`);
+    set(cRef, {
+      currentUser: userId,
+      val: event.target.value,
     });
-
-    const interval = setInterval(() => {
-      if (updated) {
-        set(colorRef, {
-          r: red,
-          g: green,
-          b: blue,
-        });
-        setUpdated(false);
-      }
-    }, 20);
-    return () => {
-      off(colorRef);
-      clearInterval(interval);
-    };
-  });
-
-  function handleColorChange(event) {
-    switch (event.target.name) {
-      case "r":
-        setRed(event.target.value);
-        setUpdated(true);
-        break;
-      case "g":
-        setGreen(event.target.value);
-        setUpdated(true);
-        break;
-      case "b":
-        setBlue(event.target.value);
-        setUpdated(true);
-        break;
-      default:
-        break;
-    }
+  }
+  function handleMouseUp(event) {
+    const cRef = ref(db, `color/${event.target.name}`);
+    set(cRef, {
+      currentUser: "",
+      val: event.target.value,
+    });
+  }
+  function handleChange(event) {
+    const cRef = ref(db, `color/${event.target.name}`);
+    set(cRef, {
+      currentUser: userId,
+      val: event.target.value,
+    });
   }
 
   return (
     <div style={{
       width: "100vw", 
       height: "100vh",
-      backgroundColor: `rgb(${red}, ${green}, ${blue})`,
+      backgroundColor: `rgb(${color.r.val}, ${color.g.val}, ${color.b.val})`,
     }}>
 
-      <form onChange={handleColorChange}> 
-        <input ref={rSliderRef} type="range" min="0" max="255" name="r" /><br/>
-        <input ref={gSliderRef} type="range" min="0" max="255" name="g" /><br/>
-        <input ref={bSliderRef} type="range" min="0" max="255" name="b" /><br/>
-      </form>
+      <input 
+        ref={rSliderRef} 
+        disabled={!(color.r.currentUser === "" || color.r.currentUser == userId)} 
+
+        onMouseDown={handleMouseDown}
+        onMouseUp={handleMouseUp}
+        onChange={handleChange}
+
+        name="r"
+        type="range" 
+        min="0" 
+        max="255" 
+      /><br/>
+
+      <input 
+        ref={gSliderRef} 
+        disabled={!(color.g.currentUser === "" || color.g.currentUser == userId)} 
+
+        onMouseDown={handleMouseDown}
+        onMouseUp={handleMouseUp}
+        onChange={handleChange}
+
+        name="g"
+        type="range" 
+        min="0" 
+        max="255" 
+      /><br/>
+
+      <input 
+        ref={bSliderRef} 
+        disabled={!(color.b.currentUser === "" || color.b.currentUser == userId)} 
+
+        onMouseDown={handleMouseDown}
+        onMouseUp={handleMouseUp}
+        onChange={handleChange}
+
+        name="b"
+        type="range" 
+        min="0" 
+        max="255" 
+      /><br/>
 
     </div>
   );
