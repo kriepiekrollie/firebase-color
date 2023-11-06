@@ -71,14 +71,16 @@ function App() {
       });
   }, []);
 
-  function handleMouseDown(event) {
+  function handlePointerDown(event) {
+    console.log("Mouse Down!");
     const cRef = ref(db, `color/${event.target.name}`);
     set(cRef, {
       currentUser: userId,
       val: event.target.value,
     });
   }
-  function handleMouseUp(event) {
+  function handlePointerUp(event) {
+    console.log("Mouse up!");
     const cRef = ref(db, `color/${event.target.name}`);
     set(cRef, {
       currentUser: "",
@@ -104,8 +106,8 @@ function App() {
         ref={rSliderRef} 
         disabled={!(color.r.currentUser === "" || color.r.currentUser == userId)} 
 
-        onMouseDown={handleMouseDown}
-        onMouseUp={handleMouseUp}
+        onPointerDown={handlePointerDown}
+        onPointerUp={handlePointerUp}
         onChange={handleChange}
 
         name="r"
@@ -118,8 +120,8 @@ function App() {
         ref={gSliderRef} 
         disabled={!(color.g.currentUser === "" || color.g.currentUser == userId)} 
 
-        onMouseDown={handleMouseDown}
-        onMouseUp={handleMouseUp}
+        onPointerDown={handlePointerDown}
+        onPointerUp={handlePointerUp}
         onChange={handleChange}
 
         name="g"
@@ -132,8 +134,8 @@ function App() {
         ref={bSliderRef} 
         disabled={!(color.b.currentUser === "" || color.b.currentUser == userId)} 
 
-        onMouseDown={handleMouseDown}
-        onMouseUp={handleMouseUp}
+        onPointerDown={handlePointerDown}
+        onPointerUp={handlePointerUp}
         onChange={handleChange}
 
         name="b"
