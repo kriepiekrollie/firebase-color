@@ -87,6 +87,24 @@ function App() {
       });
   }, []);
 
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        remove(ref(db, `users/${userId}`));
+      } else {
+        const userRef = ref(db, `users/${userId}`);
+        set(userRef, {
+          uid: userId,
+        });
+        onDisconnect(userRef).remove();
+      }
+    };
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  });
+
   function handlePointerDown(event) {
     const cRef = ref(db, `color/${event.target.name}`);
     set(cRef, {
