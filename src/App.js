@@ -2,6 +2,7 @@ import { useRef, useState, useEffect } from "react";
 import { initializeApp } from "firebase/app";
 import { getAuth, onAuthStateChanged, signInAnonymously } from "firebase/auth";
 import { getDatabase, ref, set, get, onValue, off, onDisconnect } from "firebase/database";
+import "./App.css";
 
 function App() {
   const rSliderRef = useRef(null);
@@ -95,8 +96,6 @@ function App() {
 
   return (
     <div style={{
-      width: "100vw", 
-      height: "100vh",
       backgroundColor: `rgb(${color.r.val}, ${color.g.val}, ${color.b.val})`,
     }}>
 
